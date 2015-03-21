@@ -1,0 +1,66 @@
+extends layout
+
+block content
+
+  mixin teamTable(val)
+    .team-table.col.s5(class=((val.team_name == 'A' || val.team_name == 'C') ? 'offset-s1 ' : ' ' ) + val.team_name)
+      h5=(val.team_name) +" 隊"
+      table(class='bordered hoverable centered' id="list-table")
+        thead
+          tr 
+            th QR code
+            th 玩家編號
+            th 殺人號碼
+            th 狀態
+        tbody
+          each user in val.users
+            tr(class='user team-'+val.team user_id=user.id team=val.team order=user.user_order) 
+              td(class='qr-code')
+                img(src='http://chart.apis.google.com/chart?cht=qr&chl='+user.qr_content+'&chs=130x130')
+              td(class='th-id')= val.team_name+" - "+user.order
+              td
+                .input-field
+                  input(id='number'+user.id type='text' value= user.number) 
+                  |         
+                  label(for='number'+user.id) 
+              td= user.status 
+
+
+  h3= title
+  .card-panel.box.row
+    .title 基本設定
+    span.center 設定遊戲的開始時間及遊戲長度
+    form.col.s12
+      .row
+        .input-field.col.s4.offset-s4
+          label(for='start-date') 遊戲日期
+          input#start-date.datepicker(type='date')
+      .row
+        .input-field.col.s4.offset-s4
+          label(for='start-time') 開始時間 （ hh:mm 24小時制 ）
+          input#start-time(type='text')
+      .row
+        .input-field.col.s4.offset-s4
+          label(for='game-time') 遊戲長度（ 分鐘 ）
+          input#game-time(type='text')
+      a#save-change.waves-effect.waves-light.btn 儲存
+      a.waves-effect.waves-teal.btn-flat(href="/manage" onclick='location.reload(true); return false;') 取消
+
+  .card-panel.box
+    .title 玩家設定
+    .row
+      each val in data
+        +teamTable(val)
+
+  .hidden#edit-mode(mode=mode game-id=game_id)
+  .hidden#game-data(start-time=game_data.start_time game-time=game_data.game_time)
+
+  script(src="/javascripts/edit.js")
+
+
+
+
+
+
+
+

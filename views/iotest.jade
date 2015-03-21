@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  h3= title
+  hr
+  label(for="#team") Team ID: 
+  input.input-field#team
+  br
+  label(for="#user_order") User Order:
+  input.input-field#user_order
+  br
+  button.btn#get_game_info Get game info
+  hr
+  div#container
+  script(src='/socket.io/socket.io.js')
+  script(src='/javascripts/iotest.js')

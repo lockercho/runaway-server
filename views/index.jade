@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  h2= '告密中 管理介面'
+  #login.card-panel.row
+    form.col.s12
+        .row
+          .input-field.col.s12
+            input#password.validate(type='password')
+            |         
+            label(for='password') 輸入密碼
+    a.waves-effect.waves-light.btn 送出

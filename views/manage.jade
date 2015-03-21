@@ -1,0 +1,47 @@
+extends layout
+
+block content
+  h2= '告密中 管理介面'
+
+  .card-panel.box.row
+    .title 編輯公佈欄訊息
+    form.col.s12
+      .row
+        .input-field.col.s12
+          textarea#message.materialize-textarea
+          |         
+          label(for='message') 輸入訊息文字
+      a.waves-effect.waves-light.btn#broadcast_message 發布訊息
+  
+  .card-panel.box
+    .title 遊戲列表
+    a(class='waves-effect waves-light btn left red' href='/manage/new') 新增遊戲
+
+    table(class='table table-bordered hoverable' id="list-table")
+      thead
+        tr 
+          th 
+          th 遊戲時間
+          th 遊戲長度
+          th 操作
+      tbody
+        each val in data
+          tr 
+            td= val.id
+            td(class='start-date')= val.start_time
+            td(class='game-time')= val.game_time
+            td= val.status
+            td 
+              .funlist
+                .item
+                  a(class='btn waves-effect waves-light' href='/manage/'+val.id)
+                    i.mdi-image-edit.left
+                    | 編輯
+                .item
+                  a#delete-game(class='btn waves-effect waves-light' game-id=val.id) 
+                    i.mdi-action-delete.left
+                    | 刪除
+                    
+
+
+    script(src='/javascripts/manage.js')
