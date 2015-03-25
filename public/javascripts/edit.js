@@ -78,7 +78,7 @@ $('#save-change').on('click', function(e){
           }
     }else{
         if($.isNumeric(data)) {
-            alert('新增遊戲成功，將重導至遊戲資訊頁');
+            alert('新增遊戲成功');
             window.location = '/manage/'+data;
         } else {
             alert('新增遊戲失敗');

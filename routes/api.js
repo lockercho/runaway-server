@@ -625,15 +625,12 @@ module.exports = function(io){
                 for(i in result) {
                     t = parseInt(result[i].start_time);
                     gt = t + 60 * parseInt(result[i].game_time);
-                    console.log(gt ,timestamp)
                     if(gt < timestamp) {
                         params.push(result[i].id);
                         sql += '?,';    
                     }
                 }
-                console.log('params', params);
                 if(params.length > 0) {
-
                     sql = sql.substr(0, sql.length -1) + ')';
                     console.log('sql', sql);
                     db.query(sql, params, function(err, result){

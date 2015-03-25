@@ -20,16 +20,17 @@ block content
     table(class='table table-bordered hoverable' id="list-table")
       thead
         tr 
-          th 
+          //- th 
           th 遊戲時間
           th 遊戲長度
+          th 遊戲狀態 
           th 操作
       tbody
         each val in data
           tr 
-            td= val.id
+            //- td= val.id
             td(class='start-date')= val.start_time
-            td(class='game-time')= val.game_time
+            td(class='game-time')= val.game_time + ' 分鐘'
             td= val.status
             td 
               .funlist

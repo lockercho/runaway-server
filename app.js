@@ -10,10 +10,16 @@ module.exports = function(io){
     var users = require('./routes/users');
     var api = require('./routes/api')(io);
     var manage = require('./routes/manage');
+    var auth = require('http-auth');
+    var basic = auth.basic({
+        realm: "Please enter the user name and password",
+        file: __dirname + "/./users.htpasswd" // gevorg:gpass, Sarah:testpass ...
+    });
 
     var app = express();
 
     // view engine setup
+    app.use(auth.connect(basic));
     app.set('views', path.join(__dirname, 'views'));
     app.set('view engine', 'jade');
 

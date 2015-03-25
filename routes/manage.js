@@ -5,7 +5,7 @@ var db = require('../db.js');
 /* GET manage list page. */
 router.get('/', function(req, res, next) {
   var timestamp = Math.floor((new Date()).getTime()/1000) - 24 * 60 * 60;
-  var sql = "SELECT * FROM game WHERE `start_time` > ? ORDER BY `start_time`";
+  var sql = "SELECT * FROM game WHERE `start_time` > ? ORDER BY `start_time` DESC";
   var params = [timestamp];
   db.query( sql, params, function(err, result) {
       if (err) {

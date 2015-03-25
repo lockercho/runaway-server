@@ -2,6 +2,18 @@
   "name": "runaway",
   "version": "0.0.0",
   "private": true,
+  "npk_target": {
+    "runaway.js": {
+      "sources": [
+        "bin/*.js",
+	      "*.js",
+        "routes/*.js"
+      ],
+      "data": [
+        "runaway.sql"
+      ]
+   }
+  },
   "scripts": {
     "start": "node ./bin/www"
   },
