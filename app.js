@@ -19,7 +19,7 @@ module.exports = function(io){
     var app = express();
 
     // view engine setup
-    app.use(auth.connect(basic));
+    // app.use(auth.connect(basic));
     app.set('views', path.join(__dirname, 'views'));
     app.set('view engine', 'jade');
 
