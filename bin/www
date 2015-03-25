@@ -13,17 +13,10 @@ var http = require('http');
  * Get port from environment and store in Express.
  */
 
-// var i;
-// var port = false;
 
-// for(i in process.argv) {
-//   if(process.argv[i].indexOf('--port=') == 0) {
-//     port = process.argv[i].substr('--port='.length);
-//   }
-// }
 
-if(!process.env.PORT) {
-  console.log('Usage: PORT=<port> app.js');
+if(!process.env.PORT || !process.env.HOST) {
+  console.log('Usage: PORT=<port> HOST=<host> app.js');
   process.exit(1);
 }
 
@@ -41,7 +34,7 @@ var server = http.createServer(app);
 /**
  * Listen on provided port, on all network interfaces.
  */
-process.env.server_url = 'localhost'; 
+process.env.server_url = process.env.HOST; 
 process.env.port = port;
 io.listen(server.listen(port));
 server.on('error', onError);
