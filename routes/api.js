@@ -237,14 +237,16 @@ module.exports = function(io){
         });
     });
 
-    /* GET games listing. */
-    router.post('/games/:id/delte', function(req, res, next) {
+    /* delete game. */
+    router.post('/games/:id/delete', function(req, res, next) {
         var sql = "DELETE FROM user WHERE `game_id`=?";
         db.query(sql, [req.params.id], function(err, result){
             if(!err ){
                 sql = "DELETE FROM game WHERE `id`=?";
                 db.query(sql, [req.params.id], function(err, result){
-
+                    if(!err) {
+                        res.end('1');
+                    }
                 });    
             }
         });

@@ -16,7 +16,8 @@ $('#delete-game').on('click', function(event) {
     $(this).attr('game-id');
     // get message 
     $.post('/api/games/'+$(this).attr('game-id')+'/delete', function(data) {
-        
+        alert('刪除成功');
+        window.location = '/manage/';
     });
 });
 
