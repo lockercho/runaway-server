@@ -72,14 +72,14 @@ $('#save-change').on('click', function(e){
     if(mode == 'edit') {
         if($.isNumeric(data)) {
             alert('更新成功');
-            window.location = '/manage/'+$("#edit-mode").attr('game-id');
+            window.location = '/manage/';
           } else {
             alert('更新失敗');
           }
     }else{
         if($.isNumeric(data)) {
             alert('新增遊戲成功');
-            window.location = '/manage/'+data;
+            window.location = '/manage/';
         } else {
             alert('新增遊戲失敗');
         }
