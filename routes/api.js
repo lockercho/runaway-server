@@ -224,6 +224,7 @@ module.exports = function(io){
                                     if(!err) {
                                         console.log('update user', id, 'with number', number);
                                     }
+                                    res.end('1');
 
                                 });
                             })(db, user.id, user.number);

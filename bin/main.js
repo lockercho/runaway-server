@@ -13,6 +13,7 @@ var http = require('http');
  */
 
 var port = normalizePort(process.env.PORT || '3000');
+var host = process.env.HOST;
 app.set('port', port);
 
 /**
@@ -25,7 +26,7 @@ var server = http.createServer(app);
 /**
  * Listen on provided port, on all network interfaces.
  */
-process.env.server_url = 'localhost'; 
+process.env.server_url = ''; 
 process.env.port = port;
 io.listen(server.listen(port));
 server.on('error', onError);
