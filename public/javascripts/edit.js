@@ -66,7 +66,7 @@ $('#save-change').on('click', function(e){
   var number_result = true;
   $('.user').each(function(index){
     $user = $(this);
-    if($.inArray($user.find('.input-field input').val(), numbers)) {
+    if($.inArray($user.find('.input-field input').val(), numbers) >= 0) {
       number_result = false;
       return;
     }
