@@ -33,22 +33,44 @@ $('#save-change').on('click', function(e){
   $date.setMinutes(time_obj[1]);
   $date.setSeconds(0);
 
+  var start_time = Math.floor($date.getTime()/1000);
+  console.log($date, start_time);
 
-  console.log($date, Math.floor($date.getTime()/1000));
+  var game_time = $('#game-time').val();
+  if(!$.isNumeric(game_time)) {
+    alert('遊戲時間應為數字');
+    return;
+  }
 
+  if(parseInt(game_time) < 1) {
+    alert('遊戲時間應大於 0');
+    return;
+  }
+
+  if(start_time + parseInt(game_time) * 60 < Math.floor((new Date()).getTime()/1000) ) {
+    alert('不可設定已結束的時間');
+    return;
+  }
   
   // get data
   var params = {
     mode: mode,
     start_time: Math.floor($date.getTime()/1000),
-    game_time: $('#game-time').val()
+    game_time: game_time
   };
 
   // get user data
   var $user;
   var users = [];
+  var numbers = [];
+  var number_result = true;
   $('.user').each(function(index){
     $user = $(this);
+    if($.inArray($user.find('.input-field input').val(), numbers)) {
+      number_result = false;
+      return;
+    }
+    numbers.push($user.find('.input-field input').val());
     users.push({
         id: $user.attr('user_id'),
         order: $user.attr('order'),
@@ -57,13 +79,19 @@ $('#save-change').on('click', function(e){
     })
   });
 
+  if(!number_result) {
+    alert('玩家編號不可重複');
+    return;
+  }
+
+
   params.users = JSON.stringify(users);
 
   var url;
   if(mode == 'edit') {
     url = '/api/games/'+$("#edit-mode").attr('game-id');
   } else {
-    url = '/api/games'
+    url = '/api/games';
   }
 
   console.log(params);

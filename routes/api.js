@@ -254,10 +254,10 @@ module.exports = function(io){
     });
 
     /* GET game status. */
-    router.get('/games/:id/kill/:number', function(req, res, next) {
+    router.get('/games/:id/kill', function(req, res, next) {
         var game_id = req.params.id;
         var user_id = req.query.user_id;
-        var number = req.params.number;
+        var number  = req.query.number;
         
         killPlayer(game_id, user_id, number).done(function(result){
             var now = Math.floor((new Date()).getTime()/1000);
@@ -599,17 +599,28 @@ module.exports = function(io){
             }
             if(result.length > 0) {
                 sql = "UPDATE game SET `status`='playing' WHERE `id` IN (";
+                var condition = "";
                 var params = [];
                 var i;
                 for(i in result) {
                     params.push(result[i].id);
-                    sql += '?,';
+                    condition += '?,';
                 }
-                sql = sql.substr(0, sql.length -1) + ')';
+                condition = condition.substr(0, condition.length -1);
+                sql = sql + condition + ')';
                 db.query(sql, params, function(err, result){
                     if(err) {
                         console.log(err);
                     }
+
+                    // update users status
+                    sql = "UPDATE user SET `status`='idle' WHERE `game_id` IN ("+condition+')';
+                    db.query(sql, params, function(err, result){
+                        if(err) {
+                            console.log(err);
+                        }
+                    });
+
                 });
             }
         });

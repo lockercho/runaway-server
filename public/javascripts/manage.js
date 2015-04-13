@@ -7,7 +7,7 @@ $('#broadcast_message').on('click', function(event) {
         message: $('#message').val()
     };
     $.get('/api/games/current/broadcast',params, function(data) {
-        
+        alert('發送成功');
     });
 });
 
