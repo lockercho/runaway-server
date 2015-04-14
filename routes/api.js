@@ -560,8 +560,8 @@ module.exports = function(io){
                 var i ;
                 for(i=0 ;i <result.length ; i++){
                     if(typeof sockets[result[i].id] != 'undefined') {
-			console.log(result[i]);                     
-   sockets[result[i].id].emit(tag,data);    
+            			console.log(result[i]);                     
+                        sockets[result[i].id].emit(tag,data);    
                     }
                 }
             }
@@ -591,37 +591,38 @@ module.exports = function(io){
     // check DB every 5 seconds
     setInterval(function(){
         // select games to be started
-        var timestamp = Math.floor((new Date()).getTime()/1000);
-        var sql = "SELECT `id` FROM game WHERE `status`='idle' AND `start_time`<?";
+        var timestamp = Math.floor((new Date()).getTime()/1000)+5;
+        var sql = "SELECT `id`,`start_time` FROM game WHERE `status`='idle' AND `start_time`<?";
         db.query(sql, [timestamp], function(err, result){
             if(err) {
                 return;
             }
             if(result.length > 0) {
-                sql = "UPDATE game SET `status`='playing' WHERE `id` IN (";
-                var condition = "";
-                var params = [];
-                var i;
+                var i, data, delay, game_id;
                 for(i in result) {
-                    params.push(result[i].id);
-                    condition += '?,';
+                    data = result[i];
+                    game_id = data['id'];
+                    delay = parseInt(data['start_time']) - Math.floor((new Date()).getTime()/1000);
+                    (function(db, game_id, delay){
+                        setTimeout(function(){
+                            broadcast(game_id, false, 'start', '');
+                            sql = "UPDATE game SET `status`='playing' WHERE `id`=?";
+                            db.query(sql, [game_id], function(err, result){
+                                if(err) {
+                                    console.log(err);
+                                }
+
+                                // update users status
+                                sql = "UPDATE user SET `status`='idle' WHERE `game_id`=?";
+                                db.query(sql, [game_id], function(err, result){
+                                    if(err) {
+                                        console.log(err);
+                                    }
+                                });
+                            });
+                        }, delay * 1000);
+                    })(db, game_id, delay);
                 }
-                condition = condition.substr(0, condition.length -1);
-                sql = sql + condition + ')';
-                db.query(sql, params, function(err, result){
-                    if(err) {
-                        console.log(err);
-                    }
-
-                    // update users status
-                    sql = "UPDATE user SET `status`='idle' WHERE `game_id` IN ("+condition+')';
-                    db.query(sql, params, function(err, result){
-                        if(err) {
-                            console.log(err);
-                        }
-                    });
-
-                });
             }
         });
 
@@ -634,24 +635,35 @@ module.exports = function(io){
             }
             if(result.length > 0) {
                 var params = [];
-                sql = "UPDATE game SET `status`='end' WHERE `id` IN (";
-                var i, t, gt;
+                var i, t, gt, delay, game_id;
                 for(i in result) {
+                    game_id = result[i].id;
                     t = parseInt(result[i].start_time);
                     gt = t + 60 * parseInt(result[i].game_time);
-                    if(gt < timestamp) {
+                    if(gt <= timestamp+5) {
+                        delay = gt - timestamp;
+                        (function(db, game_id, delay){
+                            setTimeout(function(){
+                                broadcast(game_id, false, 'end', '');
+                                sql = "UPDATE game SET `status`='end' WHERE `id`=?";
+                                db.query(sql, [game_id], function(err, result){
+                                    if(err) {
+                                        console.log(err);
+                                    }
+
+                                    // update users status
+                                    sql = "UPDATE user SET `status`='idle' WHERE `game_id`=?";
+                                    db.query(sql, [game_id], function(err, result){
+                                        if(err) {
+                                            console.log(err);
+                                        }
+                                    });
+                                });
+                            }, delay * 1000);
+                        })(db, game_id, delay);
                         params.push(result[i].id);
                         sql += '?,';    
                     }
-                }
-                if(params.length > 0) {
-                    sql = sql.substr(0, sql.length -1) + ')';
-                    console.log('sql', sql);
-                    db.query(sql, params, function(err, result){
-                        if(err) {
-                            console.log(err);
-                        }
-                    });    
                 }
             }
         });

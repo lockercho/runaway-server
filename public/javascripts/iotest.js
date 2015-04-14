@@ -42,6 +42,14 @@ $('#get_game_info').on('click',function() {
                     printMsg('killed', data);
                 });
 
+                socket.on("start", function(data){
+                    printMsg('start', data);
+                });
+
+                socket.on("end", function(data){
+                    printMsg('end', data);
+                });
+
 
             });    
         } else {
