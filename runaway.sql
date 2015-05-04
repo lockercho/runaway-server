@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 21, 2015 at 03:54 PM
+-- Generation Time: May 04, 2015 at 04:58 PM
 -- Server version: 5.5.33
 -- PHP Version: 5.5.3
 
@@ -28,26 +28,18 @@ CREATE TABLE `game` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=16 ;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `game`
+-- Table structure for table `message_history`
 --
 
-INSERT INTO `game` (`id`, `start_time`, `game_time`, `status`) VALUES
-(1, 1426046940, 30, 'end'),
-(2, 1426144080, 23, 'end'),
-(3, 1426144080, 23, 'end'),
-(4, 1426144080, 23, 'end'),
-(5, 1426144080, 23, 'end'),
-(6, 1426144080, 23, 'end'),
-(7, 1426162560, 45, 'end'),
-(8, 1426154400, 20, 'end'),
-(9, 1426154400, 20, 'end'),
-(10, 1425357840, 20, 'end'),
-(11, 1425357840, 20, 'end'),
-(12, 1425357840, 20, 'end'),
-(13, 1425724020, 23, 'end'),
-(14, 1425956400, 12, 'end'),
-(15, 1426248720, 20, 'end');
+CREATE TABLE `message_history` (
+  `game_id` int(11) NOT NULL,
+  `timestamp` int(11) NOT NULL,
+  `message` text NOT NULL,
+  `team_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 

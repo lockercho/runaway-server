@@ -1,6 +1,7 @@
 module.exports = function(io){
     var Promise = require("bluebird");
     var express = require('express');
+    var _ = require('underscore');
     var router = express.Router();
     var db = require('../db.js');
 
@@ -71,7 +72,7 @@ module.exports = function(io){
                     var user = result[0];
 
                     // also select game info
-                    sql = "SELECT `start_time`,`game_time` FROM game WHERE `id`=?";
+                    sql = "SELECT `start_time`,`game_time`,`status` FROM game WHERE `id`=?";
                     db.query(sql, [game_id], function(err, result){
                         if (err) {
                            console.log(err);
@@ -80,7 +81,19 @@ module.exports = function(io){
                         if(result.length > 0) {
                             user.start_time = result[0].start_time;
                             user.game_time = result[0].game_time;
-                            res.json(user);
+
+                            getGameStatusAsync(game_id).done(function(data){
+                                user = _.extend(user, data);
+                                sql = "select `timestamp`,`message` FROM message_history WHERE `game_id`=? ORDER BY `timestamp` ASC";
+                                param = [game_id];
+                                db.query(sql, param, function(err, result){
+                                    user.message = result;
+                                    res.json(user);    
+                                });
+
+                                
+                            })
+                            
                         } else {
                             res.send('{}');
                         }
@@ -380,7 +393,7 @@ module.exports = function(io){
 
     var getCurrentGameAsync = function() {
         return new Promise(function(resolve) {
-            var sql = "SELECT `id` FROM game WHERE `status`='idle' OR `status`='playing' ORDER BY `start_time` ASC LIMIT 1";
+            var sql = "SELECT `id` FROM game WHERE `status`='idle' OR `status`='playing' ORDER BY `start_time` DESC LIMIT 1";
             db.query(sql, [], function(err, result){
                 if (err) {
                    console.log(err);
@@ -411,6 +424,7 @@ module.exports = function(io){
                 }
                 var start_time = result[0].start_time;
                 var game_time = result[0].game_time;
+                var game_status = result[0].status;
                 // select users
                 sql = "SELECT `team`, count(`id`) AS count FROM user WHERE `game_id`=? AND `status`='play' GROUP BY `team` ";
                 db.query( sql, params, function(err, result) {
@@ -432,8 +446,15 @@ module.exports = function(io){
                         alive: arr,
                         start_time: start_time,
                         game_time: game_time,
+                        game_status:game_status,
+                        game_result: '',
                         packet_time: Math.floor((new Date()).getTime()/1000)
                     };
+
+                    // TODO: count game_result
+                    if(status.game_status == 'end') {
+
+                    }
 
                     resolve(status);
                 });
@@ -545,6 +566,10 @@ module.exports = function(io){
     };
 
     var broadcast = function(game_id, team_id, tag, data) {
+        data = JSON.stringify({
+            timestamp: Math.floor((new Date()).getTime()/1000),
+            data: data,
+        });
         console.log('broadcast: ', game_id, ', ',team_id, ', ',tag, ', ',data );
         var sql = "SELECT `id` FROM user WHERE `game_id`=? ";
         var param = [game_id];
@@ -565,6 +590,14 @@ module.exports = function(io){
                     }
                 }
             }
+            // add to message history
+            sql = "INSERT INTO `message_history` (`game_id`,`team_id`, `timestamp`, `message`) VALUES (?,?,?,?)";
+            param = [game_id, team_id, Math.floor((new Date()).getTime()/1000), data];
+            db.query(sql, param, function(err, result){
+                if(err){
+                    console.log(err);
+                }
+            });
         });
     };
 

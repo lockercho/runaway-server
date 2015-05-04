@@ -8,17 +8,21 @@ $('#broadcast_message').on('click', function(event) {
     };
     $.get('/api/games/current/broadcast',params, function(data) {
         alert('發送成功');
+        $('#message').val('');
     });
 });
 
-$('#delete-game').on('click', function(event) {
+$('.delete-game').on('click', function(event) {
     event.preventDefault();
     $(this).attr('game-id');
-    // get message 
-    $.post('/api/games/'+$(this).attr('game-id')+'/delete', function(data) {
-        alert('刪除成功');
-        window.location = '/manage/';
-    });
+    var boo = confirm("確定刪除遊戲？");
+    if(boo) {
+        // get message 
+        $.post('/api/games/'+$(this).attr('game-id')+'/delete', function(data) {
+            alert('刪除成功');
+            window.location = '/manage/';
+        });
+    }  
 });
 
 

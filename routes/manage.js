@@ -24,7 +24,7 @@ router.get('/iotest', function(req, res, next) {
 /* Create a new game */
 router.get('/new', function(req, res, next) {
   // use the latest numbers for new game
-  var sql = "SELECT * FROM user WHERE `game_id`=(SELECT MAX(`id`) FROM game)";
+  var sql = "SELECT * FROM user WHERE `game_id`=(SELECT MAX(`game_id`) FROM user) ORDER BY `user_order` ASC";
   db.query(sql, [], function(err, result){
     if(err) {
       console.log(err);
@@ -45,7 +45,7 @@ router.get('/:game_id', function(req, res, next) {
   db.query( sql, params, function(err, game_data) {
     if(game_data.length > 0 ){
       game_data = game_data[0];
-      sql = "SELECT * FROM user WHERE `game_id`=?";
+      sql = "SELECT * FROM user WHERE `game_id`=? ORDER BY `user_order` ASC";
       db.query( sql, params, function(err, result) {
         if (err) {
            console.log(err);

@@ -21,7 +21,7 @@ $('#get_game_info').on('click',function() {
                 // console.log('data',data);
                 var user_id = data.id;
 
-                var socket = io("http://localhost:3000?game_id="+game_id+"&user_id="+user_id); 
+                var socket = io("http://localhost:8888?game_id="+game_id+"&user_id="+user_id); 
                 socket.on("message", function(data){
                     printMsg('message', data);
                 });
