@@ -42,7 +42,7 @@ function handleDisconnect() {
     connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '"+db_name+"'", function(err, result){
       
       if(result.length === 0) {
-        connection.query("CREATE DATABASE `"+db_name+"`", function(err, result){
+        connection.query("CREATE DATABASE `"+db_name+"` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci", function(err, result){
           connection.changeUser({database : db_name}, function(err) {
             if (err) throw err;
           });

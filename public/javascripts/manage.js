@@ -1,17 +1,3 @@
-
-$('#broadcast_message').on('click', function(event) {
-    event.preventDefault();
-    
-    // get message 
-    var params = {
-        message: $('#message').val()
-    };
-    $.get('/api/games/current/broadcast',params, function(data) {
-        alert('發送成功');
-        $('#message').val('');
-    });
-});
-
 $('.delete-game').on('click', function(event) {
     event.preventDefault();
     $(this).attr('game-id');

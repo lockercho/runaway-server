@@ -3,6 +3,7 @@ var $input = $('.datepicker').pickadate();
 var picker = $input.pickadate('picker');
 
 var mode = $('#edit-mode').attr('mode');
+var game_id = $('#edit-mode').attr('game-id');
 // set start time & date
 if(mode == 'edit') {
     var $game_data = $("#game-data");
@@ -113,6 +114,93 @@ $('#save-change').on('click', function(e){
         }
     } 
   });
-  
-
 });
+
+
+// init broadcast
+var updateBroadcastHistory = function() {
+    // get message 
+    $.getJSON('/api/games/'+game_id+'/broadcast', function(data) {
+
+      data.sort(function(a,b){ return parseInt(b.timestamp) - parseInt(a.timestamp) });
+      var content = '', i;
+      for(i in data) {
+        content += '<tr>';
+        content += '<td class="date">';
+        content += data[i].timestamp;
+        content += '</td>';
+        content += '<td>';
+        content += data[i].message;
+        content += '</td>';
+        content += '</tr>';
+      }
+      
+      $('#broadcast_history').find('tbody').html(content);
+
+      $('#broadcast_history').find('.date').each(function(index){
+        $(this).html(new Date(parseInt($(this).html()) * 1000).toLocaleString());
+      });
+    });
+};
+
+updateBroadcastHistory();
+
+$('#broadcast_message').on('click', function(event) {
+    event.preventDefault();
+    
+    // get message 
+    var params = {
+        message: $('#message').val()
+    };
+    $.post('/api/games/'+game_id+'/broadcast',params, function(data) {
+        alert('發送成功');
+        $('#message').val('');
+        updateBroadcastHistory();
+    });
+});
+
+$('#end_game').on('click', function(){
+  var boo = confirm("確定要強制結束此次遊戲？");
+  if(boo) {
+    $.get('/api/games/'+game_id+'/force_end', [], function(flag) {
+      if(flag == '1') {
+        alert('操作成功');
+        window.location = '/manage/';
+      } else {
+        alert('操作失敗');
+      }
+    });
+  }
+});
+
+$('.force-die').on('click', function(){
+  var number = $(this).parents('tr').find('.number').attr('number');
+  var boo = confirm("確定要弄死玩家？");
+  if(boo) {
+    $.get('/api/games/'+game_id+'/kill', {user_id: 0, number: number}, function(flag){
+      if(flag == 'success') {
+        alert('更新成功');
+        window.location = '/manage/'+game_id;
+      } else {
+        alert('更新失敗');
+      }
+    });
+  }
+});
+
+$('.back-to-life').on('click', function(){
+  var user_id = $(this).parents('tr').attr('user_id');
+  var boo = confirm("確定要復活玩家？");
+  if(boo) {
+    $.get('/api/games/'+game_id+'/back_to_life', {user_id: user_id}, function(flag){
+      if(flag == '1') {
+        alert('更新成功');
+        window.location = '/manage/'+game_id;
+      } else {
+        alert('更新失敗');
+      }
+    });
+  }
+});
+
+

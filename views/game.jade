@@ -12,21 +12,53 @@ block content
             th 玩家編號
             th 殺人號碼
             th 狀態
+            th 操作
         tbody
           each user in val.users
             tr(class='user team-'+val.team user_id=user.id team=val.team order=user.user_order) 
               td(class='qr-code')
                 img(src='http://chart.apis.google.com/chart?cht=qr&chl='+user.qr_content+'&chs=130x130')
               td(class='th-id')= val.team_name+" - "+user.order
-              td
+              td(class='number' number=user.number)
                 .input-field
                   input(id='number'+user.id type='text' value= user.number) 
                   |         
                   label(for='number'+user.id) 
               td= user.status 
+              td
+                .a.back-to-life.waves-effect.waves-light.btn 復活
+                .a.force-die.waves-effect.waves-light.btn.red 弄死
 
 
   h3= title
+  - var show_message = (mode == 'edit');
+  if show_message 
+    .card-panel.box.row
+      .title 發送公佈欄訊息
+      form.col.s12
+        .row
+          .input-field.col.s12
+            textarea#message.materialize-textarea
+            |         
+            label(for='message') 輸入訊息文字
+        a.waves-effect.waves-light.btn#broadcast_message 發布訊息
+
+    .card-panel.box.row
+      .title 公佈欄歷史訊息
+      div
+        table#broadcast_history 
+          thead
+            tr 
+              th 時間
+              th 訊息
+          tbody
+
+    .card-panel.box.row
+      .title 遊戲操作
+      div
+        a.waves-effect.waves-light.btn.red#end_game 強制結束此次遊戲
+
+      
   .card-panel.box.row
     .title 基本設定
     span.center 設定遊戲的開始時間及遊戲長度
