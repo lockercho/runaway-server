@@ -924,12 +924,12 @@ module.exports = function(io){
                                 }
 
                                 // update users status
-                                sql = "UPDATE user SET `status`='idle' WHERE `game_id`=?";
-                                db.query(sql, [game_id], function(err, result){
-                                    if(err) {
-                                        console.log(err);
-                                    }
-                                });
+                                // sql = "UPDATE user SET `status`='idle' WHERE `game_id`=?";
+                                // db.query(sql, [game_id], function(err, result){
+                                //     if(err) {
+                                //         console.log(err);
+                                //     }
+                                // });
                             });
                         }, delay * 1000);
                     })(db, game_id, delay);
