@@ -31,7 +31,9 @@ var Player = function(game_id, team, user_order) {
         var user_id = data.id;
         self.user_id = user_id;
 
-        var socket = io("http://localhost:8888?game_id="+game_id+"&user_id="+user_id); 
+        var host = $('#host').text();
+        var port = $('#port').text();
+        var socket = io("http://"+host+":"+port+"?game_id="+game_id+"&user_id="+user_id); 
         socket.on("message", function(data){
             self.printMsg('message', data);
         });

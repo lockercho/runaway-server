@@ -7,5 +7,7 @@ block content
   button.btn#kill Kill each other
   hr
   div#container
+  div#host(style="display:none;")= host
+  div#port(style="display:none;")= port 
   script(src='/socket.io/socket.io.js')
   script(src='/javascripts/killtest.js')
