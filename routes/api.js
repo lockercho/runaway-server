@@ -7,6 +7,9 @@ module.exports = function(io){
 
     var sockets = {};
 
+    var KillQueue = [];
+    var KillQueueLock = false;
+
     // set websocket functions
     io.on('connection', function(socket){
         // socket.handshake.query.player
@@ -78,7 +81,12 @@ module.exports = function(io){
                 console.log(err);
                 return;
             }
-            var status = result[0].status;
+
+            if(result.length < 1) {
+                console.log('No such game, id = '+game_id);
+                return;   
+            }
+             var status = result[0].status;
 
             if(status == 'end') {
                 sendEnterGameData(res, game_id, team, user_order);    
@@ -291,8 +299,8 @@ module.exports = function(io){
         var game_id = req.params.id;
         var user_id = req.query.user_id;
         var number  = req.query.number;
-        
-        killPlayer(game_id, user_id, number).done(function(result){
+
+        doKillPlayer(game_id, user_id, number, function(result){
             var now = Math.floor((new Date()).getTime()/1000);
             res.send(result.result);
             if(result.result == 'success') {
@@ -362,8 +370,11 @@ module.exports = function(io){
                         });
                     });
                 });
-            } 
+            }
         });
+        
+        // killPlayer(game_id, user_id, number).done(
+        // });
     });
 
     router.get('/games/:id/exit', function(req, res, next) {
@@ -552,57 +563,83 @@ module.exports = function(io){
         });  
     };
 
+    var doKillPlayer = function(game_id, user_id, number, cb) {
+        var callback = cb;
+        KillQueue.push({
+            game_id: game_id,
+            user_id: user_id,
+            number: number,
+            callback: cb
+        });
+    };
+
     var killPlayer = function(game_id, user_id, number) {
         return new Promise(function(resolve) {
-            var sql = "SELECT `id`,`status`,`team` FROM user WHERE `game_id`=? AND `number`=?";
-            var params = [game_id,number];
-            db.query( sql, params, function(err, result) {
-                if (err) {
-                   console.log(err);
-                }
-                if(result.length == 0) {
-                    // failed, lock all members in this team
-                    resolve({result:'fail'});
-                } else {
-                    var user = result[0];
-                    if(user.status == 'idle') {
-                        resolve({
-                            result: 'fail'
-                        });
-                    }else if(user.status == 'play') {
-                        var team_id = result.team;
-                        // change user status to dead
-                        sql = "UPDATE user SET `status`='dead' WHERE `id`=?";
-                        db.query( sql, [result[0].id], function(err, result) {
-                            if (err) {
-                               console.log(err);
-                            }
+            // check the killer is alive
+            var sql = "SELECT `id` FROM user WHERE `id`=? AND `status`='play'";
 
-                            sql = "SELECT `id`,`team` FROM user WHERE `game_id`=? AND `team`=?";
-                            db.query(sql, [game_id, user.team], function(err, result){
+            db.query(sql, [user_id], function(err, result){
+                if(err) {
+                    console.log(err);
+                }
+                if(result.length === 0) {
+                    // same as kill a dead user
+                    resolve({
+                        result: 'invalid'
+                    });
+                    return;
+                }
+
+                sql = "SELECT `id`,`status`,`team` FROM user WHERE `game_id`=? AND `number`=?";
+                var params = [game_id,number];
+                db.query( sql, params, function(err, result) {
+                    if (err) {
+                       console.log(err);
+                    }
+                    console.log('DB result', result);
+                    if(result.length == 0) {
+                        // failed, lock all members in this team
+                        resolve({result:'fail'});
+                    } else {
+                        var user = result[0];
+                        if(user.status == 'idle') {
+                            resolve({
+                                result: 'fail'
+                            });
+                        }else if(user.status == 'play') {
+                            var team_id = result.team;
+                            // change user status to dead
+                            sql = "UPDATE user SET `status`='dead' WHERE `id`=?";
+                            db.query( sql, [result[0].id], function(err, result) {
                                 if (err) {
                                    console.log(err);
                                 }
-                                if(result.length > 0) {
-                                    resolve({
-                                        result:'success',
-                                        user: user,
-                                        team: result
-                                    });    
-                                }
-                            });
-                            
-                        });
-                        // TODO: lock other team member
-                    }else {
-                        // dead, rip
-                        resolve({
-                            result: 'invalid'
-                        });
-                    }
-                }
-            });
 
+                                sql = "SELECT `id`,`team` FROM user WHERE `game_id`=? AND `team`=?";
+                                db.query(sql, [game_id, user.team], function(err, result){
+                                    if (err) {
+                                       console.log(err);
+                                    }
+                                    if(result.length > 0) {
+                                        resolve({
+                                            result:'success',
+                                            user: user,
+                                            team: result
+                                        });    
+                                    }
+                                });
+                                
+                            });
+                            // TODO: lock other team member
+                        }else {
+                            // dead, rip
+                            resolve({
+                                result: 'invalid'
+                            });
+                        }
+                    }
+                });
+            });
         });
     };
 
@@ -801,8 +838,13 @@ module.exports = function(io){
                             } else {
                                 console.log('check', '4');
 
-                                resolve('');    
+                                resolve('');
+
+                                // no need to send game status 
+                                return ;   
                             }
+
+                            broadcastGameStatus(game_id);
                             
                         });
                     }
@@ -898,6 +940,29 @@ module.exports = function(io){
         });
     };
 
+    // do kill every 0.05ms
+    setInterval(function(){
+        if(KillQueue.length === 0) {
+            return;
+        }
+
+        if(KillQueueLock) {
+            console.log('locking');
+            return;
+        }
+
+        KillQueueLock = true;
+
+        var target = KillQueue.shift();
+        var game_id = target.game_id;
+        var user_id = target.user_id;
+        var number = target.number;
+
+        killPlayer(game_id, user_id, number).done(function(result){
+            KillQueueLock = false;
+            target.callback(result);
+        });
+    }, 50);
 
     // check DB every 5 seconds
     setInterval(function(){

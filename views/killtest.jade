@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  h3= title
+  hr
+  br
+  button.btn#kill Kill each other
+  hr
+  div#container
+  script(src='/socket.io/socket.io.js')
+  script(src='/javascripts/killtest.js')

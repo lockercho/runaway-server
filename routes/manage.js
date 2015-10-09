@@ -19,6 +19,9 @@ router.get('/', function(req, res, next) {
 router.get('/iotest', function(req, res, next) {
   res.render('iotest',{title: 'io test'});
 });
+router.get('/killtest', function(req, res, next) {
+  res.render('killtest',{title: 'kill test'});
+});
 
 
 /* Create a new game */

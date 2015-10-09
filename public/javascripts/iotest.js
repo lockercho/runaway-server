@@ -57,3 +57,5 @@ $('#get_game_info').on('click',function() {
         }
     });
 });
+
+

@@ -122,7 +122,7 @@ var updateBroadcastHistory = function() {
     // get message 
     $.getJSON('/api/games/'+game_id+'/broadcast', function(data) {
 
-      data.sort(function(a,b){ return parseInt(b.timestamp) - parseInt(a.timestamp) });
+      // data.sort(function(a,b){ return parseInt(b.timestamp) - parseInt(a.timestamp) });
       var content = '', i;
       for(i in data) {
         content += '<tr>';
@@ -143,7 +143,30 @@ var updateBroadcastHistory = function() {
     });
 };
 
-updateBroadcastHistory();
+setInterval(function(){
+  updateGameStatus();
+  updateBroadcastHistory();  
+}, 1000);
+
+var updateGameStatus = function() {
+  // get message 
+    $.getJSON('/api/games/'+game_id, function(data) {
+      switch(data.game_status) {
+        case 'idle':
+          $('#game_status').html('尚未開始');    
+          break;      
+        case 'playing':
+          var time_remain = data.start_time + data.game_time * 60 - data.packet_time;
+          var time_text = '進行中，剩餘時間：' + parseInt(time_remain/60) + '分' + (time_remain % 60) + '秒';
+          $('#game_status').html(time_text);    
+          break;      
+        case 'end':
+          $('#game_status').html('遊戲已結束');    
+          break;      
+      }
+    });
+};
+
 
 $('#broadcast_message').on('click', function(event) {
     event.preventDefault();
